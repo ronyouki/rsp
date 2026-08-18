@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>じゃんけんぽん！ - オンライン対戦</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#241f38;
+    --night:#191c3a;
+    --night-2:#242759;
+    --paper:#faf5e8;
+    --gold:#e6a13d;
+    --vermillion:#d1483f;
+    --teal:#3d8b7d;
+    --line: rgba(250,245,232,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% 15%, rgba(230,161,61,0.16), transparent 45%),
+      radial-gradient(circle at 82% 78%, rgba(61,139,125,0.18), transparent 50%),
+      var(--night);
+    color:var(--paper);
+    font-family:'Zen Maru Gothic', sans-serif;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px 16px;
+  }
+  .stage{ width:100%; max-width:520px; }
+  header{ text-align:center; margin-bottom:18px; }
+  .eyebrow{
+    font-family:'Kosugi Maru', sans-serif;
+    letter-spacing:.35em;
+    font-size:11px;
+    color:var(--gold);
+    opacity:.85;
+    margin:0 0 6px;
+  }
+  h1{
+    font-family:'Kosugi Maru', sans-serif;
+    font-size:clamp(28px, 7vw, 40px);
+    margin:0;
+    text-shadow:0 0 22px rgba(230,161,61,0.35);
+  }
+  h1 span{color:var(--vermillion);}
+
+  .panel{
+    background:linear-gradient(180deg, var(--night-2), var(--night));
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:28px 22px;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+
+  .screen{ display:none; }
+  .screen.active{ display:block; }
+
+  /* --- ロビー画面 --- */
+  .lobby-choice{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-bottom:18px;
+  }
+  .big-btn{
+    flex:1;
+    min-width:180px;
+    font-family:'Kosugi Maru', sans-serif;
+    font-size:15px;
+    padding:16px 12px;
+    border-radius:16px;
+    border:1.5px solid var(--line);
+    background:rgba(250,245,232,0.04);
+    color:var(--paper);
+    cursor:pointer;
+    transition:transform .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .big-btn:hover{ transform:translateY(-3px); border-color:var(--gold); background:rgba(230,161,61,0.08); }
+  .big-btn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+  .big-btn .sub{ display:block; font-size:11px; opacity:.6; margin-top:4px; font-family:'Zen Maru Gothic', sans-serif; }
+
+  .join-row{
+    display:none;
+    gap:8px;
+    margin-top:14px;
+  }
+  .join-row.active{ display:flex; }
+  .join-row input{
+    flex:1;
+    background:rgba(250,245,232,0.06);
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    color:var(--paper);
+    font-family:'Kosugi Maru', sans-serif;
+    font-size:18px;
+    letter-spacing:.2em;
+    text-align:center;
+    text-transform:uppercase;
+    padding:10px 8px;
+  }
+  .join-row input:focus-visible{ outline:2px solid var(--gold); }
+  .join-row button{
+    font-family:'Kosugi Maru', sans-serif;
+    background:var(--gold);
+    color:var(--ink);
+    border:none;
+    border-radius:12px;
+    padding:0 18px;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .lobby-msg{
+    text-align:center;
+    font-size:13px;
+    min-height:18px;
+    margin-top:10px;
+    color:var(--vermillion);
+  }
+
+  /* --- 待機画面 --- */
+  .waiting{ text-align:center; }
+  .room-code{
+    font-family:'Kosugi Maru', sans-serif;
+    font-size:44px;
+    letter-spacing:.15em;
+    color:var(--gold);
+    margin:14px 0;
+  }
+  .waiting p{ font-size:13px; opacity:.75; line-height:1.7; }
+  .pulse{
+    width:14px;height:14px;
+    border-radius:50%;
+    background:var(--teal);
+    margin:16px auto 4px;
+    animation:pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{ transform:scale(1); opacity:.7; }
+    50%{ transform:scale(1.5); opacity:1; }
+  }
+
+  /* --- 対戦画面 --- */
+  .scorecard{
+    display:flex; justify-content:center; gap:10px; margin-bottom:18px;
+  }
+  .score-item{
+    background:rgba(250,245,232,0.06);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:10px 20px;
+    text-align:center;
+    min-width:90px;
+  }
+  .score-item .label{ font-size:11px; letter-spacing:.1em; opacity:.65; font-family:'Kosugi Maru', sans-serif; }
+  .score-item .num{ font-size:26px; font-family:'Kosugi Maru', sans-serif; color:var(--gold); margin-top:2px; }
+
+  .versus-row{
+    display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:140px;
+  }
+  .fighter{ flex:1; text-align:center; }
+  .fighter .tag{ font-family:'Kosugi Maru', sans-serif; font-size:12px; letter-spacing:.15em; opacity:.6; margin-bottom:8px; }
+  .hand-display{
+    width:92px; height:92px; margin:0 auto;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:50%;
+    background:rgba(250,245,232,0.05);
+    border:1px solid var(--line);
+  }
+  .hand-display svg{ width:52px; height:52px; }
+  .vs-mark{ font-family:'Kosugi Maru', sans-serif; font-size:18px; color:var(--gold); opacity:.8; }
+
+  .result-banner{
+    text-align:center;
+    font-family:'Kosugi Maru', sans-serif;
+    font-size:clamp(18px,5vw,24px);
+    min-height:30px;
+    margin:14px 0 4px;
+    color:var(--gold);
+  }
+  .result-banner.win{ color:var(--teal); }
+  .result-banner.lose{ color:var(--vermillion); }
+  .status-line{ text-align:center; font-size:13px; opacity:.6; margin-bottom:18px; min-height:16px; }
+
+  .choices{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .choice-btn{
+    appearance:none;
+    border:1.5px solid var(--line);
+    background:rgba(250,245,232,0.04);
+    border-radius:18px;
+    padding:14px 10px 10px;
+    width:92px;
+    cursor:pointer;
+    color:var(--paper);
+    font-family:'Zen Maru Gothic', sans-serif;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    transition:transform .15s ease, border-color .15s ease, background .15s ease;
+  }
+  .choice-btn svg{ width:38px; height:38px; }
+  .choice-btn .name{ font-size:12px; opacity:.8; }
+  .choice-btn:hover:not(:disabled){ transform:translateY(-4px); border-color:var(--gold); background:rgba(230,161,61,0.08); }
+  .choice-btn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+  .choice-btn.selected{ border-color:var(--teal); background:rgba(61,139,125,0.14); }
+  .choice-btn:disabled{ opacity:.35; cursor:not-allowed; transform:none; }
+
+  .leave-row{ text-align:center; margin-top:20px; }
+  .text-btn{
+    font-family:'Kosugi Maru', sans-serif;
+    background:none; border:1px solid var(--line);
+    color:var(--paper); opacity:.7; font-size:12px;
+    padding:8px 18px; border-radius:999px; cursor:pointer; letter-spacing:.08em;
+  }
+  .text-btn:hover{ opacity:1; border-color:var(--vermillion); color:var(--vermillion); }
+
+  footer{ text-align:center; font-size:11px; opacity:.4; margin-top:22px; }
+
+  @media (max-width:420px){
+    .hand-display{ width:74px; height:74px; }
+    .hand-display svg{ width:42px; height:42px; }
+    .choice-btn{ width:80px; padding:12px 6px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<main class="stage">
+  <header>
+    <p class="eyebrow">ROCK · PAPER · SCISSORS ONLINE</p>
+    <h1>じゃんけん<span>ぽん！</span></h1>
+  </header>
+
+  <div class="panel">
+
+    <!-- ロビー画面 -->
+    <section class="screen active" id="screen-lobby">
+      <div class="lobby-choice">
+        <button class="big-btn" id="btnCreate">部屋を作る
+          <span class="sub">相手を招待して1対1で対戦</span>
+        </button>
+        <button class="big-btn" id="btnShowJoin">部屋に参加する
+          <span class="sub">合言葉コードを入力</span>
+        </button>
+      </div>
+      <div class="join-row" id="joinRow">
+        <input id="codeInput" maxlength="4" placeholder="コード" autocomplete="off">
+        <button id="btnJoin">参加</button>
+      </div>
+      <p class="lobby-msg" id="lobbyMsg"></p>
+    </section>
+
+    <!-- 待機画面 -->
+    <section class="screen" id="screen-waiting">
+      <div class="waiting">
+        <p>このコードを相手に伝えてね</p>
+        <div class="room-code" id="roomCodeDisplay">----</div>
+        <div class="pulse"></div>
+        <p>相手の参加を待っています…</p>
+        <div class="leave-row">
+          <button class="text-btn" id="btnCancelWait">キャンセル</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 対戦画面 -->
+    <section class="screen" id="screen-game">
+      <div class="scorecard">
+        <div class="score-item">
+          <div class="label">あなた</div>
+          <div class="num" id="yourScore">0</div>
+        </div>
+        <div class="score-item">
+          <div class="label">相手</div>
+          <div class="num" id="oppScore">0</div>
+        </div>
+      </div>
+
+      <div class="versus-row">
+        <div class="fighter">
+          <p class="tag">あなた</p>
+          <div class="hand-display" id="youHand"></div>
+        </div>
+        <div class="vs-mark">VS</div>
+        <div class="fighter">
+          <p class="tag">相手</p>
+          <div class="hand-display" id="oppHand"></div>
+        </div>
+      </div>
+
+      <p class="result-banner" id="resultBanner" role="status">手を選んでね</p>
+      <p class="status-line" id="statusLine"></p>
+
+      <div class="choices" id="choices">
+        <button class="choice-btn" data-choice="rock" aria-label="グーを選ぶ">
+          <svg viewBox="0 0 64 64" fill="none" stroke="var(--paper)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="32" cy="34" r="18"></circle>
+            <path d="M20 30 Q20 22 32 22 Q44 22 44 30" opacity=".5"></path>
+          </svg>
+          <span class="name">グー</span>
+        </button>
+        <button class="choice-btn" data-choice="scissors" aria-label="チョキを選ぶ">
+          <svg viewBox="0 0 64 64" fill="none" stroke="var(--paper)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M32 44 L20 16"></path>
+            <path d="M32 44 L44 16"></path>
+            <circle cx="20" cy="16" r="4"></circle>
+            <circle cx="44" cy="16" r="4"></circle>
+          </svg>
+          <span class="name">チョキ</span>
+        </button>
+        <button class="choice-btn" data-choice="paper" aria-label="パーを選ぶ">
+          <svg viewBox="0 0 64 64" fill="none" stroke="var(--paper)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="16" y="14" width="32" height="40" rx="6"></rect>
+            <path d="M16 26 H48 M16 36 H48"></path>
+          </svg>
+          <span class="name">パー</span>
+        </button>
+      </div>
+
+      <div class="leave-row">
+        <button class="text-btn" id="btnLeave">部屋を出る</button>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>じゃんけんぽん！ &mdash; オンライン対戦版</footer>
+</main>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+(function(){
+  const socket = io();
+
+  const HANDS = {
+    rock:     `<circle cx="32" cy="34" r="18"></circle><path d="M20 30 Q20 22 32 22 Q44 22 44 30" opacity=".5"></path>`,
+    scissors: `<path d="M32 44 L20 16"></path><path d="M32 44 L44 16"></path><circle cx="20" cy="16" r="4"></circle><circle cx="44" cy="16" r="4"></circle>`,
+    paper:    `<rect x="16" y="14" width="32" height="40" rx="6"></rect><path d="M16 26 H48 M16 36 H48"></path>`
+  };
+
+  function handSvg(inner){
+    return `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+  }
+  function questionSvg(){
+    return handSvg(`<circle cx="32" cy="32" r="20"></circle><text x="32" y="39" text-anchor="middle" font-size="22" fill="currentColor" stroke="none" font-family="sans-serif">?</text>`);
+  }
+
+  // --- 画面切り替え ---
+  const screens = {
+    lobby: document.getElementById('screen-lobby'),
+    waiting: document.getElementById('screen-waiting'),
+    game: document.getElementById('screen-game'),
+  };
+  function showScreen(name){
+    Object.values(screens).forEach(s => s.classList.remove('active'));
+    screens[name].classList.add('active');
+  }
+
+  // --- ロビー ---
+  const btnCreate = document.getElementById('btnCreate');
+  const btnShowJoin = document.getElementById('btnShowJoin');
+  const joinRow = document.getElementById('joinRow');
+  const codeInput = document.getElementById('codeInput');
+  const btnJoin = document.getElementById('btnJoin');
+  const lobbyMsg = document.getElementById('lobbyMsg');
+  const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+  const btnCancelWait = document.getElementById('btnCancelWait');
+
+  btnCreate.addEventListener('click', () => {
+    lobbyMsg.textContent = '';
+    socket.emit('createRoom');
+  });
+
+  btnShowJoin.addEventListener('click', () => {
+    joinRow.classList.toggle('active');
+    if(joinRow.classList.contains('active')) codeInput.focus();
+  });
+
+  btnJoin.addEventListener('click', doJoin);
+  codeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') doJoin(); });
+  function doJoin(){
+    const code = codeInput.value.trim();
+    if(!code) return;
+    lobbyMsg.textContent = '';
+    socket.emit('joinRoom', code);
+  }
+
+  btnCancelWait.addEventListener('click', () => {
+    socket.emit('leaveRoom');
+    showScreen('lobby');
+  });
+
+  socket.on('roomCreated', ({ code }) => {
+    roomCodeDisplay.textContent = code;
+    showScreen('waiting');
+  });
+
+  socket.on('joinError', (msg) => {
+    lobbyMsg.textContent = msg;
+  });
+
+  // --- 対戦準備 ---
+  const yourScoreEl = document.getElementById('yourScore');
+  const oppScoreEl = document.getElementById('oppScore');
+  const youHandEl = document.getElementById('youHand');
+  const oppHandEl = document.getElementById('oppHand');
+  const resultBanner = document.getElementById('resultBanner');
+  const statusLine = document.getElementById('statusLine');
+  const choiceButtons = document.querySelectorAll('.choice-btn');
+  const btnLeave = document.getElementById('btnLeave');
+
+  function resetArena(){
+    youHandEl.innerHTML = questionSvg();
+    oppHandEl.innerHTML = questionSvg();
+    resultBanner.textContent = '手を選んでね';
+    resultBanner.className = 'result-banner';
+    statusLine.textContent = '';
+    choiceButtons.forEach(b => { b.disabled = false; b.classList.remove('selected'); });
+  }
+
+  socket.on('opponentJoined', () => {
+    yourScoreEl.textContent = '0';
+    oppScoreEl.textContent = '0';
+    resetArena();
+    showScreen('game');
+  });
+
+  choiceButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      choiceButtons.forEach(b => { b.disabled = true; b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      resultBanner.textContent = '相手の手を待っています…';
+      resultBanner.className = 'result-banner';
+      socket.emit('chooseHand', btn.dataset.choice);
+    });
+  });
+
+  socket.on('opponentChose', () => {
+    if(statusLine) statusLine.textContent = '相手は手を選び終えました';
+  });
+
+  socket.on('roundResult', (data) => {
+    youHandEl.innerHTML = handSvg(HANDS[data.yourHand]);
+    oppHandEl.innerHTML = handSvg(HANDS[data.opponentHand]);
+    yourScoreEl.textContent = data.yourScore;
+    oppScoreEl.textContent = data.opponentScore;
+    statusLine.textContent = '';
+
+    if(data.outcome === 'win'){
+      resultBanner.textContent = 'あなたの勝ち！';
+      resultBanner.className = 'result-banner win';
+    } else if(data.outcome === 'lose'){
+      resultBanner.textContent = 'あなたの負け…';
+      resultBanner.className = 'result-banner lose';
+    } else {
+      resultBanner.textContent = 'あいこでしょ！';
+      resultBanner.className = 'result-banner';
+    }
+
+    setTimeout(() => {
+      choiceButtons.forEach(b => { b.disabled = false; b.classList.remove('selected'); });
+      resultBanner.textContent = 'もう一度、手を選んでね';
+      resultBanner.className = 'result-banner';
+    }, 1400);
+  });
+
+  socket.on('opponentLeft', () => {
+    resultBanner.textContent = '相手が退出しました';
+    resultBanner.className = 'result-banner lose';
+    choiceButtons.forEach(b => b.disabled = true);
+    statusLine.textContent = 'ロビーに戻って新しい部屋を作ってください';
+    setTimeout(() => {
+      socket.emit('leaveRoom');
+      showScreen('lobby');
+      joinRow.classList.remove('active');
+      codeInput.value = '';
+    }, 2200);
+  });
+
+  btnLeave.addEventListener('click', () => {
+    socket.emit('leaveRoom');
+    showScreen('lobby');
+    joinRow.classList.remove('active');
+    codeInput.value = '';
+  });
+
+  resetArena();
+})();
+</script>
+
+</body>
+</html>
