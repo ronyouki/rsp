@@ -350,6 +350,7 @@
 
 <div class="splash-screen" id="splashScreen" aria-label="読み込み中">
   <audio id="lobbyAudio" src="/assets/lobby.mp3" preload="auto" loop></audio>
+  <audio id="battleAudio" src="/assets/battle.mp3" preload="auto" loop></audio>
   <div class="splash-content">
     <img class="splash-logo" src="/assets/logo.svg" alt="じゃんけんぽん！">
     <div class="splash-loader" aria-hidden="true"></div>
@@ -460,13 +461,19 @@
   document.body.classList.add('splash-active');
   const splashScreen = document.getElementById('splashScreen');
   const lobbyAudio = document.getElementById('lobbyAudio');
+  const battleAudio = document.getElementById('battleAudio');
 
   function playLobbyAudio(){
     if (!document.body.classList.contains('menu-active')) return;
     lobbyAudio.play().catch(() => {});
   }
+  function playBattleAudio(){
+    if (!document.body.classList.contains('game-active') && !document.body.classList.contains('waiting-active')) return;
+    battleAudio.play().catch(() => {});
+  }
   ['pointerdown', 'keydown', 'touchstart'].forEach(eventName => {
     document.addEventListener(eventName, playLobbyAudio);
+    document.addEventListener(eventName, playBattleAudio);
   });
 
   window.setTimeout(() => {
@@ -502,11 +509,20 @@
     const isLobby = name === 'lobby';
     document.body.classList.toggle('menu-active', isLobby);
     document.body.classList.toggle('game-active', name === 'game');
+    document.body.classList.toggle('waiting-active', name === 'waiting');
     if (isLobby) {
       playLobbyAudio();
+      battleAudio.pause();
+      battleAudio.currentTime = 0;
+    } else if (name === 'game' || name === 'waiting') {
+      lobbyAudio.pause();
+      lobbyAudio.currentTime = 0;
+      playBattleAudio();
     } else {
       lobbyAudio.pause();
       lobbyAudio.currentTime = 0;
+      battleAudio.pause();
+      battleAudio.currentTime = 0;
     }
   }
 
