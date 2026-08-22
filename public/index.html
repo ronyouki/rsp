@@ -35,6 +35,7 @@
   }
   body.splash-active{ padding:0; overflow:hidden; }
   body.menu-active{ padding:0; overflow:hidden; }
+  body.game-active{ padding:0; overflow:hidden; }
   .splash-screen{
     position:fixed;
     inset:0;
@@ -100,6 +101,22 @@
     position:relative;
     width:100%;
     height:100%;
+  }
+  body.game-active .stage{
+    width:100vw;
+    max-width:none;
+    height:100vh;
+  }
+  body.game-active header,
+  body.game-active footer{ display:none; }
+  body.game-active .panel{
+    width:100%;
+    height:100%;
+    padding:28px 22px;
+    border:0;
+    border-radius:0;
+    background:#191c3a url('/assets/battle_background.png') center / cover no-repeat;
+    box-shadow:none;
   }
 
   /* --- ロビー画面 --- */
@@ -208,7 +225,8 @@
     background:rgba(250,245,232,0.05);
     border:1px solid var(--line);
   }
-  .hand-display svg{ width:52px; height:52px; }
+  .hand-display img{ width:64px; height:64px; object-fit:contain; }
+  .hand-question{ font-size:42px; font-weight:700; color:var(--paper); }
   .vs-mark{ font-family:'Kosugi Maru', sans-serif; font-size:18px; color:var(--gold); opacity:.8; }
 
   .result-banner{
@@ -237,7 +255,7 @@
     display:flex; flex-direction:column; align-items:center; gap:6px;
     transition:transform .15s ease, border-color .15s ease, background .15s ease;
   }
-  .choice-btn svg{ width:38px; height:38px; }
+  .choice-btn img{ width:52px; height:52px; object-fit:contain; }
   .choice-btn .name{ font-size:12px; opacity:.8; }
   .choice-btn:hover:not(:disabled){ transform:translateY(-4px); border-color:var(--gold); background:rgba(230,161,61,0.08); }
   .choice-btn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
@@ -379,26 +397,15 @@
 
       <div class="choices" id="choices">
         <button class="choice-btn" data-choice="rock" aria-label="グーを選ぶ">
-          <svg viewBox="0 0 64 64" fill="none" stroke="var(--paper)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="32" cy="34" r="18"></circle>
-            <path d="M20 30 Q20 22 32 22 Q44 22 44 30" opacity=".5"></path>
-          </svg>
+          <img src="/assets/rock.png" alt="">
           <span class="name">グー</span>
         </button>
         <button class="choice-btn" data-choice="scissors" aria-label="チョキを選ぶ">
-          <svg viewBox="0 0 64 64" fill="none" stroke="var(--paper)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M32 44 L20 16"></path>
-            <path d="M32 44 L44 16"></path>
-            <circle cx="20" cy="16" r="4"></circle>
-            <circle cx="44" cy="16" r="4"></circle>
-          </svg>
+          <img src="/assets/scissors.png" alt="">
           <span class="name">チョキ</span>
         </button>
         <button class="choice-btn" data-choice="paper" aria-label="パーを選ぶ">
-          <svg viewBox="0 0 64 64" fill="none" stroke="var(--paper)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="16" y="14" width="32" height="40" rx="6"></rect>
-            <path d="M16 26 H48 M16 36 H48"></path>
-          </svg>
+          <img src="/assets/paper.png" alt="">
           <span class="name">パー</span>
         </button>
       </div>
@@ -450,16 +457,16 @@
   const socket = io();
 
   const HANDS = {
-    rock:     `<circle cx="32" cy="34" r="18"></circle><path d="M20 30 Q20 22 32 22 Q44 22 44 30" opacity=".5"></path>`,
-    scissors: `<path d="M32 44 L20 16"></path><path d="M32 44 L44 16"></path><circle cx="20" cy="16" r="4"></circle><circle cx="44" cy="16" r="4"></circle>`,
-    paper:    `<rect x="16" y="14" width="32" height="40" rx="6"></rect><path d="M16 26 H48 M16 36 H48"></path>`
+    rock: '/assets/rock.png',
+    scissors: '/assets/scissors.png',
+    paper: '/assets/paper.png'
   };
 
-  function handSvg(inner){
-    return `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+  function handImage(src){
+    return `<img src="${src}" alt="">`;
   }
   function questionSvg(){
-    return handSvg(`<circle cx="32" cy="32" r="20"></circle><text x="32" y="39" text-anchor="middle" font-size="22" fill="currentColor" stroke="none" font-family="sans-serif">?</text>`);
+    return '<span class="hand-question">?</span>';
   }
 
   // --- 画面切り替え ---
@@ -473,6 +480,7 @@
     screens[name].classList.add('active');
     const isLobby = name === 'lobby';
     document.body.classList.toggle('menu-active', isLobby);
+    document.body.classList.toggle('game-active', name === 'game');
     if (isLobby) {
       playLobbyAudio();
     } else {
@@ -607,8 +615,8 @@
   });
 
   socket.on('roundResult', (data) => {
-    youHandEl.innerHTML = handSvg(HANDS[data.yourHand]);
-    oppHandEl.innerHTML = handSvg(HANDS[data.opponentHand]);
+    youHandEl.innerHTML = handImage(HANDS[data.yourHand]);
+    oppHandEl.innerHTML = handImage(HANDS[data.opponentHand]);
     yourScoreEl.textContent = data.yourScore;
     oppScoreEl.textContent = data.opponentScore;
     statusLine.textContent = '';
