@@ -201,9 +201,9 @@
   /* --- 対戦画面 --- */
   .scorecard{
     position:relative;
-    width:100%;
+    width:min(82%, 760px);
     aspect-ratio:2176 / 704;
-    margin-bottom:18px;
+    margin:0 auto 14px;
     background:url('/assets/battle_score.png') center / 100% 100% no-repeat;
   }
   .score-item{
@@ -219,13 +219,14 @@
   .score-item:first-child{ left:8%; }
   .score-item:last-child{ right:8%; }
   .score-item .label{ display:none; }
-  .score-item .num{ font-size:clamp(30px, 6vw, 56px); font-family:'Kosugi Maru', sans-serif; color:var(--ink); line-height:1; }
+  .score-item .num{ font-size:clamp(24px, 4vw, 42px); font-family:'Kosugi Maru', sans-serif; color:var(--ink); line-height:1; }
 
   .versus-row{
     position:relative;
-    width:100%;
+    width:min(82%, 760px);
     aspect-ratio:3 / 2;
     min-height:0;
+    margin:0 auto;
     background:url('/assets/battle_hand_sheet.png') center / 100% 100% no-repeat;
   }
   .fighter{
@@ -246,8 +247,8 @@
     border:0;
     background:transparent;
   }
-  .hand-display img{ width:72%; height:72%; object-fit:contain; mix-blend-mode:multiply; }
-  .hand-question{ font-size:42px; font-weight:700; color:var(--paper); }
+  .hand-display img{ width:58%; height:58%; object-fit:contain; mix-blend-mode:multiply; }
+  .hand-question{ font-size:34px; font-weight:700; color:var(--paper); }
   .vs-mark{ display:none; }
 
   .result-banner{
