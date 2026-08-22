@@ -735,7 +735,7 @@
     if(statusLine) statusLine.textContent = '相手は手を選び終えました';
   });
 
-  // 通信の瞬断などで結果が届かず「相手の手を待っています…」のまま固まるのを防ぐ
+  // 通信の切断などで結果が届かず「相手の手を待っています…」のまま固まるのを防ぐ（人間の相手が選ぶのが遅いだけでは発火しないよう十分に長く取る）
   let roundWatchdog = null;
   function startRoundWatchdog(){
     clearRoundWatchdog();
@@ -747,7 +747,7 @@
         socket.emit('leaveRoom');
         showScreen('lobby');
       }, 2000);
-    }, 10000);
+    }, 60000);
   }
   function clearRoundWatchdog(){
     if(roundWatchdog){
@@ -755,6 +755,17 @@
       roundWatchdog = null;
     }
   }
+
+  // ソケットが実際に切断された場合はすぐに検知してロビーへ戻す
+  socket.on('disconnect', () => {
+    if(!screens.game.classList.contains('active') && !screens.waiting.classList.contains('active')) return;
+    clearRoundWatchdog();
+    resultBanner.textContent = '通信が切断されました';
+    resultBanner.className = 'result-banner lose';
+    statusLine.textContent = 'ロビーに戻ってやり直してください';
+    choiceButtons.forEach(b => b.disabled = true);
+    setTimeout(() => showScreen('lobby'), 2000);
+  });
 
   socket.on('roundResult', (data) => {
     clearRoundWatchdog();
