@@ -727,6 +727,7 @@
       resultBanner.textContent = '相手の手を待っています…';
       resultBanner.className = 'result-banner';
       socket.emit('chooseHand', btn.dataset.choice);
+      startRoundWatchdog();
     });
   });
 
@@ -734,7 +735,29 @@
     if(statusLine) statusLine.textContent = '相手は手を選び終えました';
   });
 
+  // 通信の瞬断などで結果が届かず「相手の手を待っています…」のまま固まるのを防ぐ
+  let roundWatchdog = null;
+  function startRoundWatchdog(){
+    clearRoundWatchdog();
+    roundWatchdog = setTimeout(() => {
+      resultBanner.textContent = '通信が不安定なようです…';
+      resultBanner.className = 'result-banner lose';
+      statusLine.textContent = 'ロビーに戻ってやり直してください';
+      setTimeout(() => {
+        socket.emit('leaveRoom');
+        showScreen('lobby');
+      }, 2000);
+    }, 10000);
+  }
+  function clearRoundWatchdog(){
+    if(roundWatchdog){
+      clearTimeout(roundWatchdog);
+      roundWatchdog = null;
+    }
+  }
+
   socket.on('roundResult', (data) => {
+    clearRoundWatchdog();
     youHandEl.innerHTML = handImage(HANDS[data.yourHand]);
     oppHandEl.innerHTML = handImage(HANDS[data.opponentHand]);
     setScore(yourScoreEl, data.yourScore);
@@ -787,6 +810,7 @@
   });
 
   socket.on('opponentLeft', () => {
+    clearRoundWatchdog();
     resultBanner.textContent = '相手が退出しました';
     resultBanner.className = 'result-banner lose';
     choiceButtons.forEach(b => b.disabled = true);
@@ -798,11 +822,13 @@
   });
 
   btnLeave.addEventListener('click', () => {
+    clearRoundWatchdog();
     socket.emit('leaveRoom');
     showScreen('lobby');
   });
 
   btnToTitle.addEventListener('click', () => {
+    clearRoundWatchdog();
     socket.emit('leaveRoom');
     showScreen('lobby');
   });
