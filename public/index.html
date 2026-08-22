@@ -34,6 +34,7 @@
     padding:28px 16px;
   }
   body.splash-active{ padding:0; overflow:hidden; }
+  body.title-active{ padding:0; overflow:hidden; }
   .splash-screen{
     position:fixed;
     inset:0;
@@ -53,6 +54,41 @@
   .splash-loader::after{ content:''; display:block; width:45%; height:100%; background:var(--gold); animation:splash-load 1.8s ease-in-out infinite; }
   @keyframes splash-rise{ from{opacity:0; transform:translateY(18px) scale(.96)} to{opacity:1; transform:none} }
   @keyframes splash-load{ from{transform:translateX(-120%)} to{transform:translateX(340%)} }
+  .title-screen{
+    position:fixed;
+    inset:0;
+    z-index:5;
+    display:block;
+    background:#191c3a;
+    overflow:hidden;
+  }
+  .title-screen[hidden]{ display:none; }
+  .title-image{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .title-actions{ position:absolute; inset:0; z-index:1; pointer-events:none; }
+  .start-btn{
+    position:absolute;
+    left:23%;
+    bottom:5%;
+    width:20%;
+    height:13%;
+    border:0;
+    border-radius:30px;
+    padding:0;
+    background:transparent;
+    color:transparent;
+    font-size:0;
+    cursor:pointer;
+    pointer-events:auto;
+    transition:box-shadow .15s ease;
+  }
+  .start-btn:hover{ box-shadow:0 0 0 4px rgba(255,255,255,.55), 0 0 20px rgba(230,161,61,.75); }
+  .start-btn:focus-visible{ outline:4px solid var(--paper); outline-offset:4px; }
   .stage{ width:100%; max-width:520px; }
   header{ text-align:center; margin-bottom:18px; }
   .eyebrow{
@@ -303,6 +339,13 @@
   </div>
 </div>
 
+<section class="title-screen" id="titleScreen" hidden aria-label="タイトル画面">
+  <img class="title-image" src="/assets/title.JPG" alt="ゲームタイトル">
+  <div class="title-actions">
+    <button class="start-btn" id="btnStart" type="button">スタート</button>
+  </div>
+</section>
+
 <main class="stage">
   <header>
     <p class="eyebrow">ROCK · PAPER · SCISSORS ONLINE</p>
@@ -427,11 +470,20 @@
 (function(){
   document.body.classList.add('splash-active');
   const splashScreen = document.getElementById('splashScreen');
+  const titleScreen = document.getElementById('titleScreen');
+  const btnStart = document.getElementById('btnStart');
   window.setTimeout(() => {
     splashScreen.classList.add('is-hidden');
     document.body.classList.remove('splash-active');
-    document.getElementById('screen-lobby').classList.add('active');
+    document.body.classList.add('title-active');
+    titleScreen.hidden = false;
   }, 2400);
+
+  btnStart.addEventListener('click', () => {
+    titleScreen.hidden = true;
+    document.body.classList.remove('title-active');
+    document.getElementById('screen-lobby').classList.add('active');
+  });
 
   const socket = io();
 
