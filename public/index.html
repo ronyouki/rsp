@@ -225,7 +225,7 @@
     background:rgba(250,245,232,0.05);
     border:1px solid var(--line);
   }
-  .hand-display img{ width:64px; height:64px; object-fit:contain; }
+  .hand-display img{ width:64px; height:64px; object-fit:contain; mix-blend-mode:multiply; }
   .hand-question{ font-size:42px; font-weight:700; color:var(--paper); }
   .vs-mark{ font-family:'Kosugi Maru', sans-serif; font-size:18px; color:var(--gold); opacity:.8; }
 
@@ -255,7 +255,7 @@
     display:flex; flex-direction:column; align-items:center; gap:6px;
     transition:transform .15s ease, border-color .15s ease, background .15s ease;
   }
-  .choice-btn img{ width:52px; height:52px; object-fit:contain; }
+  .choice-btn img{ width:52px; height:52px; object-fit:contain; mix-blend-mode:multiply; }
   .choice-btn .name{ font-size:12px; opacity:.8; }
   .choice-btn:hover:not(:disabled){ transform:translateY(-4px); border-color:var(--gold); background:rgba(230,161,61,0.08); }
   .choice-btn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
