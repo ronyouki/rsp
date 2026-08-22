@@ -359,6 +359,7 @@
 
 <div class="splash-screen" id="splashScreen" aria-label="読み込み中">
   <audio id="splashAudio" src="/assets/splash.mp3" preload="auto"></audio>
+  <audio id="lobbyAudio" src="/assets/lobby.mp3" preload="auto" loop></audio>
   <div class="splash-content">
     <img class="splash-logo" src="/assets/logo.svg" alt="じゃんけんぽん！">
     <div class="splash-loader" aria-hidden="true"></div>
@@ -490,15 +491,21 @@
   document.body.classList.add('splash-active');
   const splashScreen = document.getElementById('splashScreen');
   const splashAudio = document.getElementById('splashAudio');
+  const lobbyAudio = document.getElementById('lobbyAudio');
   let splashFinished = false;
 
   function playSplashAudio(){
     if (splashFinished) return;
     splashAudio.play().catch(() => {});
   }
+  function playLobbyAudio(){
+    if (!document.body.classList.contains('menu-active')) return;
+    lobbyAudio.play().catch(() => {});
+  }
   playSplashAudio();
   ['pointerdown', 'keydown', 'touchstart'].forEach(eventName => {
     document.addEventListener(eventName, playSplashAudio, { once: true });
+    document.addEventListener(eventName, playLobbyAudio);
   });
 
   window.setTimeout(() => {
@@ -507,8 +514,7 @@
     document.body.classList.remove('splash-active');
     splashAudio.pause();
     splashAudio.currentTime = 0;
-    document.body.classList.add('menu-active');
-    document.getElementById('screen-lobby').classList.add('active');
+    showScreen('lobby');
   }, 2400);
 
   const socket = io();
@@ -535,7 +541,14 @@
   function showScreen(name){
     Object.values(screens).forEach(s => s.classList.remove('active'));
     screens[name].classList.add('active');
-    document.body.classList.toggle('menu-active', name === 'lobby');
+    const isLobby = name === 'lobby';
+    document.body.classList.toggle('menu-active', isLobby);
+    if (isLobby) {
+      playLobbyAudio();
+    } else {
+      lobbyAudio.pause();
+      lobbyAudio.currentTime = 0;
+    }
   }
 
   // --- ロビー ---
