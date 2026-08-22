@@ -112,7 +112,7 @@
   body.game-active .panel{
     width:100%;
     height:100%;
-    padding:28px 22px;
+    padding:16px 10px;
     border:0;
     border-radius:0;
     background:#191c3a url('/assets/battle_background.png') center top / auto 100% no-repeat;
@@ -201,7 +201,7 @@
   /* --- 対戦画面 --- */
   .scorecard{
     position:relative;
-    width:min(72%, 680px);
+    width:min(64%, 620px);
     aspect-ratio:2176 / 704;
     margin:0 auto 14px;
     background:url('/assets/battle_score.png') center / 100% 100% no-repeat;
@@ -220,7 +220,9 @@
   .score-item:last-child{ right:8%; }
   .score-item .label{ display:none; }
   .score-item .num{
-    width:58%;
+    width:auto;
+    height:100%;
+    max-width:100%;
     aspect-ratio:1;
     margin:0 auto;
     font-size:0;
@@ -237,7 +239,7 @@
 
   .versus-row{
     position:relative;
-    width:min(72%, 680px);
+    width:min(64%, 620px);
     aspect-ratio:3 / 2;
     min-height:0;
     margin:7vh auto 4vh;
@@ -261,7 +263,7 @@
     border:0;
     background:transparent;
   }
-  .hand-display img{ width:68%; height:68%; object-fit:contain; }
+  .hand-display img{ width:62%; height:62%; object-fit:contain; }
   .hand-question{ font-size:34px; font-weight:700; color:var(--paper); }
   .vs-mark{ display:none; }
 
