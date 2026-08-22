@@ -410,19 +410,19 @@
   .match-over .result-status{ position:absolute; left:50%; bottom:1%; transform:translateX(-50%); margin:0; color:var(--paper); }
   .match-over .btn-title{
     position:absolute;
-    top:4%;
-    left:4%;
-    padding:8px 18px;
-    border-radius:999px;
-    background:rgba(25,28,58,.86);
-    border:1px solid rgba(250,245,232,.42);
-    color:var(--paper);
-    font-family:'Kosugi Maru', sans-serif;
-    font-size:12px;
-    letter-spacing:.08em;
+    left:50%;
+    bottom:5%;
+    width:30%;
+    height:10%;
+    transform:translateX(-135%);
+    padding:0;
+    border:0;
+    border-radius:30px;
+    background:transparent;
+    color:transparent;
     cursor:pointer;
   }
-  .match-over .btn-title:hover{ border-color:var(--gold); color:var(--gold); }
+  .match-over .btn-title:hover{ box-shadow:0 0 0 4px rgba(255,255,255,.5), 0 0 20px rgba(230,161,61,.75); }
 
   .leave-row{ text-align:center; margin-top:20px; }
   body.game-active > .stage .leave-row{ margin-top:1.5vh; }
@@ -531,7 +531,7 @@
       </div>
 
       <div class="match-over" id="matchOverPanel">
-        <button class="btn-title" id="btnToTitle" type="button">タイトルへ</button>
+        <button class="btn-title" id="btnToTitle" type="button" aria-label="タイトルへ戻る"></button>
         <div class="result-scorecard">
           <div class="score-item">
             <div class="num score-number-0" id="resultYourScore">0</div>
