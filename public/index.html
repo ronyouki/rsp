@@ -152,19 +152,44 @@
   body.menu-active .big-btn .sub{ display:none; }
 
   .join-row{
-    display:none;
+    display:flex;
     gap:8px;
-    margin-top:14px;
+    width:min(100%, 360px);
   }
-  .join-row.active{ display:flex; }
-  body.menu-active .join-row{
-    position:absolute;
-    left:33.5%;
-    top:85%;
-    width:33%;
-    height:8%;
-    gap:2%;
-    margin:0;
+  .join-modal{
+    position:fixed;
+    inset:0;
+    z-index:20;
+    display:none;
+    place-items:center;
+    padding:20px;
+    background:rgba(20,22,46,.62);
+  }
+  .join-modal.active{ display:grid; }
+  .join-dialog{
+    width:min(100%, 430px);
+    padding:28px 22px 22px;
+    border:1px solid rgba(250,245,232,.22);
+    border-radius:20px;
+    background:linear-gradient(180deg, var(--night-2), var(--night));
+    box-shadow:0 24px 60px rgba(0,0,0,.45);
+  }
+  .join-dialog-title{
+    margin:0 0 18px;
+    color:var(--paper);
+    font:700 18px 'Kosugi Maru', sans-serif;
+    text-align:center;
+  }
+  .join-dialog-close{
+    display:block;
+    margin:14px auto 0;
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:8px 20px;
+    background:transparent;
+    color:var(--paper);
+    font:12px 'Kosugi Maru', sans-serif;
+    cursor:pointer;
   }
   .join-row input{
     flex:1;
@@ -190,15 +215,6 @@
     font-size:14px;
     cursor:pointer;
   }
-  body.menu-active .join-row input,
-  body.menu-active .join-row button{
-    border:0;
-    background:transparent;
-    color:transparent;
-    text-shadow:none;
-  }
-  body.menu-active .join-row input{ min-width:0; }
-  body.menu-active .join-row button{ width:27%; padding:0; }
   .lobby-msg{
     text-align:center;
     font-size:13px;
@@ -387,12 +403,19 @@
           <span class="sub">合言葉コードを入力</span>
         </button>
       </div>
-      <div class="join-row" id="joinRow">
-        <input id="codeInput" maxlength="4" placeholder="コード" autocomplete="off">
-        <button id="btnJoin">参加</button>
-      </div>
       <p class="lobby-msg" id="lobbyMsg"></p>
     </section>
+
+    <div class="join-modal" id="joinModal" role="dialog" aria-modal="true" aria-labelledby="joinDialogTitle">
+      <div class="join-dialog">
+        <p class="join-dialog-title" id="joinDialogTitle">合言葉コードを入力</p>
+        <div class="join-row" id="joinRow">
+          <input id="codeInput" maxlength="4" placeholder="コード" autocomplete="off">
+          <button id="btnJoin">参加</button>
+        </div>
+        <button class="join-dialog-close" id="btnCloseJoin" type="button">閉じる</button>
+      </div>
+    </div>
 
     <!-- 待機画面 -->
     <section class="screen" id="screen-waiting">
@@ -555,9 +578,11 @@
   const btnRandom = document.getElementById('btnRandom');
   const btnCreate = document.getElementById('btnCreate');
   const btnShowJoin = document.getElementById('btnShowJoin');
+  const joinModal = document.getElementById('joinModal');
   const joinRow = document.getElementById('joinRow');
   const codeInput = document.getElementById('codeInput');
   const btnJoin = document.getElementById('btnJoin');
+  const btnCloseJoin = document.getElementById('btnCloseJoin');
   const lobbyMsg = document.getElementById('lobbyMsg');
   const roomCodeDisplay = document.getElementById('roomCodeDisplay');
   const waitingCodeLabel = document.getElementById('waitingCodeLabel');
@@ -582,9 +607,17 @@
   });
 
   btnShowJoin.addEventListener('click', () => {
-    joinRow.classList.toggle('active');
-    if(joinRow.classList.contains('active')) codeInput.focus();
+    joinModal.classList.add('active');
+    codeInput.focus();
   });
+  btnCloseJoin.addEventListener('click', closeJoinModal);
+  joinModal.addEventListener('click', (event) => {
+    if(event.target === joinModal) closeJoinModal();
+  });
+  function closeJoinModal(){
+    joinModal.classList.remove('active');
+    codeInput.value = '';
+  }
 
   btnJoin.addEventListener('click', doJoin);
   codeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') doJoin(); });
@@ -592,6 +625,7 @@
     const code = codeInput.value.trim();
     if(!code) return;
     lobbyMsg.textContent = '';
+    closeJoinModal();
     socket.emit('joinRoom', code);
   }
 
@@ -602,6 +636,7 @@
       socket.emit('leaveRoom');
     }
     showScreen('lobby');
+    closeJoinModal();
   });
 
   socket.on('roomCreated', ({ code }) => {
@@ -768,7 +803,7 @@
     setTimeout(() => {
       socket.emit('leaveRoom');
       showScreen('lobby');
-      joinRow.classList.remove('active');
+      closeJoinModal();
       codeInput.value = '';
     }, 2200);
   });
@@ -776,7 +811,7 @@
   btnLeave.addEventListener('click', () => {
     socket.emit('leaveRoom');
     showScreen('lobby');
-    joinRow.classList.remove('active');
+    closeJoinModal();
     codeInput.value = '';
   });
 
