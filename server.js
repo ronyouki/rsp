@@ -24,7 +24,7 @@ const aiFallbackTimers = new Map(); // socketId -> timeout handle
 const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 紛らわしい文字(0/O, 1/I)は除外
 const BEATS = { rock: 'scissors', scissors: 'paper', paper: 'rock' };
 const HANDS_LIST = ['rock', 'scissors', 'paper'];
-const WIN_SCORE = 10; // 先取本数
+const WIN_SCORE = 5; // 先取本数
 const AI_KEY = '__AI__'; // AI用のスコア管理キー（socketIdと衝突しない特殊キー）
 const AI_MATCH_WAIT_MS = 6000; // この時間、人間の相手が見つからなければAI対戦にする
 

@@ -318,7 +318,7 @@
 
     <!-- 対戦画面 -->
     <section class="screen" id="screen-game">
-      <p class="eyebrow" style="text-align:center; margin-bottom:10px;">10本先取</p>
+      <p class="eyebrow" style="text-align:center; margin-bottom:10px;">5本先取</p>
       <div class="scorecard">
         <div class="score-item">
           <div class="label">あなた</div>
@@ -602,8 +602,8 @@
       choiceButtons.forEach(b => { b.disabled = true; b.classList.remove('selected'); });
       choicesEl.style.display = 'none';
       matchOverTitle.textContent = data.youWonMatch
-        ? '10本先取！あなたの勝利です！'
-        : `10本先取…${vsAI ? 'AI' : '相手'}の勝利です`;
+        ? '5本先取！あなたの勝利です！'
+        : `5本先取…${vsAI ? 'AI' : '相手'}の勝利です`;
       matchOverTitle.className = 'result-banner ' + (data.youWonMatch ? 'win' : 'lose');
       matchOverPanel.style.display = 'block';
       return;
