@@ -15,6 +15,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // roomCode -> { players: [socketId, socketId], choices: {}, scores: {} }
 const rooms = new Map();
 
+// ランダムマッチング待ちの socketId 一覧（合言葉コードなしで対戦相手を探す用）
+let waitingQueue = [];
+
 const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 紛らわしい文字(0/O, 1/I)は除外
 const BEATS = { rock: 'scissors', scissors: 'paper', paper: 'rock' };
 
@@ -33,6 +36,10 @@ function generateRoomCode() {
 function judge(h1, h2) {
   if (h1 === h2) return 'draw';
   return BEATS[h1] === h2 ? 'p1' : 'p2';
+}
+
+function leaveQueue(socket) {
+  waitingQueue = waitingQueue.filter((id) => id !== socket.id);
 }
 
 function leaveCurrentRoom(socket) {
@@ -85,6 +92,38 @@ io.on('connection', (socket) => {
     io.to(code).emit('opponentJoined');
   });
 
+  // 合言葉なしのランダムマッチング
+  socket.on('findRandomMatch', () => {
+    leaveCurrentRoom(socket);
+    leaveQueue(socket);
+
+    // 待機中に切断済みの相手が残っていないか掃除する
+    waitingQueue = waitingQueue.filter((id) => io.sockets.sockets.has(id));
+
+    const opponentId = waitingQueue.shift();
+    const opponentSocket = opponentId ? io.sockets.sockets.get(opponentId) : null;
+
+    if (opponentSocket) {
+      const code = generateRoomCode();
+      rooms.set(code, {
+        players: [opponentId, socket.id],
+        choices: {},
+        scores: { [opponentId]: 0, [socket.id]: 0 },
+      });
+      opponentSocket.join(code);
+      opponentSocket.data.room = code;
+      socket.join(code);
+      socket.data.room = code;
+
+      io.to(code).emit('opponentJoined');
+    } else {
+      waitingQueue.push(socket.id);
+      socket.emit('waitingForMatch');
+    }
+  });
+
+  socket.on('cancelMatch', () => leaveQueue(socket));
+
   socket.on('chooseHand', (hand) => {
     if (!['rock', 'scissors', 'paper'].includes(hand)) return;
 
@@ -125,7 +164,10 @@ io.on('connection', (socket) => {
   });
 
   socket.on('leaveRoom', () => leaveCurrentRoom(socket));
-  socket.on('disconnect', () => leaveCurrentRoom(socket));
+  socket.on('disconnect', () => {
+    leaveQueue(socket);
+    leaveCurrentRoom(socket);
+  });
 });
 
 const PORT = process.env.PORT || 3000;

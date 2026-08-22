@@ -241,6 +241,9 @@
     <!-- ロビー画面 -->
     <section class="screen active" id="screen-lobby">
       <div class="lobby-choice">
+        <button class="big-btn" id="btnRandom">ランダムマッチング
+          <span class="sub">合言葉なしで自動的に対戦相手を探す</span>
+        </button>
         <button class="big-btn" id="btnCreate">部屋を作る
           <span class="sub">相手を招待して1対1で対戦</span>
         </button>
@@ -258,10 +261,10 @@
     <!-- 待機画面 -->
     <section class="screen" id="screen-waiting">
       <div class="waiting">
-        <p>このコードを相手に伝えてね</p>
+        <p id="waitingCodeLabel">このコードを相手に伝えてね</p>
         <div class="room-code" id="roomCodeDisplay">----</div>
         <div class="pulse"></div>
-        <p>相手の参加を待っています…</p>
+        <p id="waitingMainText">相手の参加を待っています…</p>
         <div class="leave-row">
           <button class="text-btn" id="btnCancelWait">キャンセル</button>
         </div>
@@ -362,6 +365,7 @@
   }
 
   // --- ロビー ---
+  const btnRandom = document.getElementById('btnRandom');
   const btnCreate = document.getElementById('btnCreate');
   const btnShowJoin = document.getElementById('btnShowJoin');
   const joinRow = document.getElementById('joinRow');
@@ -369,7 +373,21 @@
   const btnJoin = document.getElementById('btnJoin');
   const lobbyMsg = document.getElementById('lobbyMsg');
   const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+  const waitingCodeLabel = document.getElementById('waitingCodeLabel');
+  const waitingMainText = document.getElementById('waitingMainText');
   const btnCancelWait = document.getElementById('btnCancelWait');
+
+  let waitMode = 'room'; // 'room' = 部屋作成待ち, 'queue' = ランダムマッチング待ち
+
+  btnRandom.addEventListener('click', () => {
+    lobbyMsg.textContent = '';
+    waitMode = 'queue';
+    waitingCodeLabel.style.display = 'none';
+    roomCodeDisplay.style.display = 'none';
+    waitingMainText.textContent = '対戦相手を探しています…';
+    showScreen('waiting');
+    socket.emit('findRandomMatch');
+  });
 
   btnCreate.addEventListener('click', () => {
     lobbyMsg.textContent = '';
@@ -391,13 +409,25 @@
   }
 
   btnCancelWait.addEventListener('click', () => {
-    socket.emit('leaveRoom');
+    if (waitMode === 'queue') {
+      socket.emit('cancelMatch');
+    } else {
+      socket.emit('leaveRoom');
+    }
     showScreen('lobby');
   });
 
   socket.on('roomCreated', ({ code }) => {
+    waitMode = 'room';
+    waitingCodeLabel.style.display = '';
+    roomCodeDisplay.style.display = '';
+    waitingMainText.textContent = '相手の参加を待っています…';
     roomCodeDisplay.textContent = code;
     showScreen('waiting');
+  });
+
+  socket.on('waitingForMatch', () => {
+    // findRandomMatch を押した時点ですでに待機画面を表示済み
   });
 
   socket.on('joinError', (msg) => {
