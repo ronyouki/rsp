@@ -36,6 +36,7 @@
   body.splash-active{ padding:0; overflow:hidden; }
   body.menu-active{ padding:0; overflow:hidden; }
   body.game-active{ padding:0; overflow:hidden; }
+  body.waiting-active{ padding:0; overflow:hidden; }
   .splash-screen{
     position:fixed;
     inset:0;
@@ -117,6 +118,49 @@
     border-radius:0;
     background:#191c3a url('/assets/battle_background.png') center top / auto 100% no-repeat;
     box-shadow:none;
+  }
+  body.game-active .leave-row,
+  body.game-active .history-panel{
+    width:min(64%, 620px);
+    margin-left:auto;
+    margin-right:auto;
+  }
+  body.waiting-active .stage{
+    width:100vw;
+    max-width:none;
+    height:100vh;
+  }
+  body.waiting-active header,
+  body.waiting-active footer{ display:none; }
+  body.waiting-active .panel{
+    width:100%;
+    height:100%;
+    padding:0;
+    border:0;
+    border-radius:0;
+    background:#191c3a url('/assets/wait.png') center top / auto 100% no-repeat;
+    box-shadow:none;
+  }
+  body.waiting-active #screen-waiting{
+    position:relative;
+    width:100%;
+    height:100%;
+  }
+  body.waiting-active .waiting p,
+  body.waiting-active .room-code,
+  body.waiting-active .pulse{ display:none; }
+  body.waiting-active .waiting .leave-row{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:4%;
+    margin:0;
+  }
+  body.waiting-active .waiting .text-btn{
+    background:rgba(25,28,58,.86);
+    border-color:rgba(250,245,232,.45);
+    color:var(--paper);
+    opacity:1;
   }
 
   /* --- ロビー画面 --- */
@@ -303,6 +347,17 @@
   .choice-btn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
   .choice-btn.selected{ border-color:var(--teal); background:rgba(61,139,125,0.14); }
   .choice-btn:disabled{ opacity:.35; cursor:not-allowed; transform:none; }
+
+  .match-over .big-btn{
+    background:rgba(25,28,58,.9);
+    border:1px solid rgba(250,245,232,.42);
+    color:var(--paper);
+  }
+  .match-over .big-btn:hover:not(:disabled){
+    background:rgba(230,161,61,.9);
+    border-color:var(--gold);
+    color:var(--ink);
+  }
 
   .leave-row{ text-align:center; margin-top:20px; }
   .leave-row .text-btn{ background:rgba(25,28,58,.82); border-color:rgba(250,245,232,.28); }
