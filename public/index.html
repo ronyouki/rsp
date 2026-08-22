@@ -337,7 +337,7 @@
         </div>
         <div class="vs-mark">VS</div>
         <div class="fighter">
-          <p class="tag">相手</p>
+          <p class="tag" id="oppTag">相手</p>
           <div class="hand-display" id="oppHand"></div>
         </div>
       </div>
@@ -443,7 +443,7 @@
     waitMode = 'queue';
     waitingCodeLabel.style.display = 'none';
     roomCodeDisplay.style.display = 'none';
-    waitingMainText.textContent = '対戦相手を探しています…';
+    waitingMainText.textContent = '対戦相手を探しています…（見つからない場合は自動でAIと対戦します）';
     showScreen('waiting');
     socket.emit('findRandomMatch');
   });
@@ -509,9 +509,11 @@
   const rematchStatus = document.getElementById('rematchStatus');
   const historyList = document.getElementById('historyList');
 
+  const oppTag = document.getElementById('oppTag');
   const HAND_LABEL = { rock: 'グー', scissors: 'チョキ', paper: 'パー' };
   const OUTCOME_LABEL = { win: '勝ち', lose: '負け', draw: 'あいこ' };
   let history = [];
+  let vsAI = false;
 
   function renderHistory(){
     if(history.length === 0){
@@ -547,7 +549,9 @@
     resetHistory();
   }
 
-  socket.on('opponentJoined', () => {
+  socket.on('opponentJoined', (info) => {
+    vsAI = !!(info && info.vsAI);
+    oppTag.textContent = vsAI ? 'AI' : '相手';
     yourScoreEl.textContent = '0';
     oppScoreEl.textContent = '0';
     resetArena();
@@ -599,7 +603,7 @@
       choicesEl.style.display = 'none';
       matchOverTitle.textContent = data.youWonMatch
         ? '10本先取！あなたの勝利です！'
-        : '10本先取…相手の勝利です';
+        : `10本先取…${vsAI ? 'AI' : '相手'}の勝利です`;
       matchOverTitle.className = 'result-banner ' + (data.youWonMatch ? 'win' : 'lose');
       matchOverPanel.style.display = 'block';
       return;
