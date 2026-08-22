@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>じゃんけんぽん！ - オンライン対戦</title>
+<title>じゃんけんポン！ - オンライン対戦</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -35,21 +35,19 @@
   }
   body.splash-active{ padding:0; overflow:hidden; }
   body.title-active{ padding:0; overflow:hidden; }
+  body.menu-active{ padding:0; overflow:hidden; }
   .splash-screen{
     position:fixed;
     inset:0;
     z-index:10;
     display:grid;
     place-items:center;
-    background:
-      radial-gradient(circle at 50% 44%, rgba(230,161,61,0.2), transparent 34%),
-      linear-gradient(145deg, #14162e 0%, #242759 55%, #191c3a 100%);
+    background:#fff;
     transition:opacity .55s ease, visibility .55s ease;
   }
   .splash-screen.is-hidden{ opacity:0; visibility:hidden; pointer-events:none; }
   .splash-content{ text-align:center; animation:splash-rise .8s cubic-bezier(.2,.8,.2,1) both; }
   .splash-logo{ width:min(72vw, 360px); height:auto; display:block; margin:0 auto 28px; }
-  .splash-caption{ margin:0; color:var(--gold); font-family:'Kosugi Maru', sans-serif; font-size:12px; letter-spacing:.35em; }
   .splash-loader{ width:120px; height:2px; margin:26px auto 0; overflow:hidden; background:rgba(250,245,232,.16); }
   .splash-loader::after{ content:''; display:block; width:45%; height:100%; background:var(--gold); animation:splash-load 1.8s ease-in-out infinite; }
   @keyframes splash-rise{ from{opacity:0; transform:translateY(18px) scale(.96)} to{opacity:1; transform:none} }
@@ -118,6 +116,28 @@
   .screen{ display:none; }
   .screen.active{ display:block; }
 
+  body.menu-active .stage{
+    width:100vw;
+    max-width:none;
+    height:100vh;
+  }
+  body.menu-active header,
+  body.menu-active footer{ display:none; }
+  body.menu-active .panel{
+    width:100%;
+    height:100%;
+    padding:0;
+    border:0;
+    border-radius:0;
+    background:#191c3a url('/assets/lobby.jpg') center / cover no-repeat;
+    box-shadow:none;
+  }
+  body.menu-active #screen-lobby{
+    position:relative;
+    width:100%;
+    height:100%;
+  }
+
   /* --- ロビー画面 --- */
   .lobby-choice{
     display:flex;
@@ -125,6 +145,17 @@
     flex-wrap:wrap;
     justify-content:center;
     margin-bottom:18px;
+  }
+  body.menu-active .lobby-choice{
+    position:absolute;
+    left:31.5%;
+    top:43%;
+    width:37%;
+    height:41%;
+    display:flex;
+    flex-direction:column;
+    gap:2.5%;
+    margin:0;
   }
   .big-btn{
     flex:1;
@@ -142,6 +173,19 @@
   .big-btn:hover{ transform:translateY(-3px); border-color:var(--gold); background:rgba(230,161,61,0.08); }
   .big-btn:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
   .big-btn .sub{ display:block; font-size:11px; opacity:.6; margin-top:4px; font-family:'Zen Maru Gothic', sans-serif; }
+  body.menu-active .big-btn{
+    width:100%;
+    min-width:0;
+    height:31%;
+    padding:0;
+    border:0;
+    border-radius:30px;
+    background:transparent;
+    color:transparent;
+    font-size:0;
+  }
+  body.menu-active .big-btn:hover{ transform:scale(1.02); border:0; background:rgba(255,255,255,.08); }
+  body.menu-active .big-btn .sub{ display:none; }
 
   .join-row{
     display:none;
@@ -149,6 +193,15 @@
     margin-top:14px;
   }
   .join-row.active{ display:flex; }
+  body.menu-active .join-row{
+    position:absolute;
+    left:33.5%;
+    top:85%;
+    width:33%;
+    height:8%;
+    gap:2%;
+    margin:0;
+  }
   .join-row input{
     flex:1;
     background:rgba(250,245,232,0.06);
@@ -173,6 +226,15 @@
     font-size:14px;
     cursor:pointer;
   }
+  body.menu-active .join-row input,
+  body.menu-active .join-row button{
+    border:0;
+    background:transparent;
+    color:transparent;
+    text-shadow:none;
+  }
+  body.menu-active .join-row input{ min-width:0; }
+  body.menu-active .join-row button{ width:27%; padding:0; }
   .lobby-msg{
     text-align:center;
     font-size:13px;
@@ -334,7 +396,6 @@
 <div class="splash-screen" id="splashScreen" aria-label="読み込み中">
   <div class="splash-content">
     <img class="splash-logo" src="/assets/logo.svg" alt="じゃんけんぽん！">
-    <p class="splash-caption">ROCK · PAPER · SCISSORS</p>
     <div class="splash-loader" aria-hidden="true"></div>
   </div>
 </div>
@@ -482,6 +543,7 @@
   btnStart.addEventListener('click', () => {
     titleScreen.hidden = true;
     document.body.classList.remove('title-active');
+    document.body.classList.add('menu-active');
     document.getElementById('screen-lobby').classList.add('active');
   });
 
@@ -509,6 +571,7 @@
   function showScreen(name){
     Object.values(screens).forEach(s => s.classList.remove('active'));
     screens[name].classList.add('active');
+    document.body.classList.toggle('menu-active', name === 'lobby');
   }
 
   // --- ロビー ---
