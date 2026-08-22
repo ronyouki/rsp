@@ -374,7 +374,6 @@
 <body>
 
 <div class="splash-screen" id="splashScreen" aria-label="読み込み中">
-  <audio id="splashAudio" src="/assets/splash.mp3" preload="auto"></audio>
   <audio id="lobbyAudio" src="/assets/lobby.mp3" preload="auto" loop></audio>
   <div class="splash-content">
     <img class="splash-logo" src="/assets/logo.svg" alt="じゃんけんぽん！">
@@ -513,30 +512,19 @@
 (function(){
   document.body.classList.add('splash-active');
   const splashScreen = document.getElementById('splashScreen');
-  const splashAudio = document.getElementById('splashAudio');
   const lobbyAudio = document.getElementById('lobbyAudio');
-  let splashFinished = false;
 
-  function playSplashAudio(){
-    if (splashFinished) return;
-    splashAudio.play().catch(() => {});
-  }
   function playLobbyAudio(){
     if (!document.body.classList.contains('menu-active')) return;
     lobbyAudio.play().catch(() => {});
   }
-  playSplashAudio();
   ['pointerdown', 'keydown', 'touchstart'].forEach(eventName => {
-    document.addEventListener(eventName, playSplashAudio, { once: true });
     document.addEventListener(eventName, playLobbyAudio);
   });
 
   window.setTimeout(() => {
-    splashFinished = true;
     splashScreen.classList.add('is-hidden');
     document.body.classList.remove('splash-active');
-    splashAudio.pause();
-    splashAudio.currentTime = 0;
     showScreen('lobby');
   }, 2400);
 
