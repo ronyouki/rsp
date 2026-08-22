@@ -219,14 +219,28 @@
   .score-item:first-child{ left:8%; }
   .score-item:last-child{ right:8%; }
   .score-item .label{ display:none; }
-  .score-item .num{ font-size:clamp(24px, 4vw, 42px); font-family:'Kosugi Maru', sans-serif; color:var(--ink); line-height:1; }
+  .score-item .num{
+    width:58%;
+    aspect-ratio:1;
+    margin:0 auto;
+    font-size:0;
+    background-image:url('/assets/score_number.png');
+    background-repeat:no-repeat;
+    background-size:300% 200%;
+  }
+  .score-number-0{ background-position:0 0; }
+  .score-number-1{ background-position:50% 0; }
+  .score-number-2{ background-position:100% 0; }
+  .score-number-3{ background-position:0 100%; }
+  .score-number-4{ background-position:50% 100%; }
+  .score-number-5{ background-position:100% 100%; }
 
   .versus-row{
     position:relative;
     width:min(82%, 760px);
     aspect-ratio:3 / 2;
     min-height:0;
-    margin:0 auto;
+    margin:4vh auto 4vh;
     background:url('/assets/battle_hand_sheet.png') center / 100% 100% no-repeat;
   }
   .fighter{
@@ -254,7 +268,7 @@
   .result-banner{
     text-align:center;
     font-family:'Kosugi Maru', sans-serif;
-    font-size:clamp(18px,5vw,24px);
+    font-size:clamp(14px,3.5vw,18px);
     min-height:30px;
     margin:14px 0 4px;
     padding:8px 16px;
@@ -400,7 +414,6 @@
 
     <!-- 対戦画面 -->
     <section class="screen" id="screen-game">
-      <p class="eyebrow" style="text-align:center; margin-bottom:10px;">5本先取</p>
       <div class="scorecard">
         <div class="score-item">
           <div class="label">あなた</div>
@@ -585,6 +598,11 @@
   // --- 対戦準備 ---
   const yourScoreEl = document.getElementById('yourScore');
   const oppScoreEl = document.getElementById('oppScore');
+
+  function setScore(element, score){
+    element.textContent = score;
+    element.className = `num score-number-${Math.max(0, Math.min(5, Number(score)))}`;
+  }
   const youHandEl = document.getElementById('youHand');
   const oppHandEl = document.getElementById('oppHand');
   const resultBanner = document.getElementById('resultBanner');
@@ -641,8 +659,8 @@
   socket.on('opponentJoined', (info) => {
     vsAI = !!(info && info.vsAI);
     oppTag.textContent = vsAI ? 'AI' : '相手';
-    yourScoreEl.textContent = '0';
-    oppScoreEl.textContent = '0';
+    setScore(yourScoreEl, 0);
+    setScore(oppScoreEl, 0);
     resetArena();
     showScreen('game');
   });
@@ -664,8 +682,8 @@
   socket.on('roundResult', (data) => {
     youHandEl.innerHTML = handImage(HANDS[data.yourHand]);
     oppHandEl.innerHTML = handImage(HANDS[data.opponentHand]);
-    yourScoreEl.textContent = data.yourScore;
-    oppScoreEl.textContent = data.opponentScore;
+    setScore(yourScoreEl, data.yourScore);
+    setScore(oppScoreEl, data.opponentScore);
     statusLine.textContent = '';
 
     if(data.outcome === 'win'){
@@ -716,8 +734,8 @@
   });
 
   socket.on('rematchStart', () => {
-    yourScoreEl.textContent = '0';
-    oppScoreEl.textContent = '0';
+    setScore(yourScoreEl, 0);
+    setScore(oppScoreEl, 0);
     resetArena();
   });
 
