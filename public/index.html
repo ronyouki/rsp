@@ -490,8 +490,10 @@
   document.body.classList.add('splash-active');
   const splashScreen = document.getElementById('splashScreen');
   const splashAudio = document.getElementById('splashAudio');
+  let splashFinished = false;
 
   function playSplashAudio(){
+    if (splashFinished) return;
     splashAudio.play().catch(() => {});
   }
   playSplashAudio();
@@ -500,6 +502,7 @@
   });
 
   window.setTimeout(() => {
+    splashFinished = true;
     splashScreen.classList.add('is-hidden');
     document.body.classList.remove('splash-active');
     splashAudio.pause();
