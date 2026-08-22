@@ -273,6 +273,7 @@
 
     <!-- 対戦画面 -->
     <section class="screen" id="screen-game">
+      <p class="eyebrow" style="text-align:center; margin-bottom:10px;">10本先取</p>
       <div class="scorecard">
         <div class="score-item">
           <div class="label">あなた</div>
@@ -323,6 +324,12 @@
           </svg>
           <span class="name">パー</span>
         </button>
+      </div>
+
+      <div class="match-over" id="matchOverPanel" style="display:none; text-align:center;">
+        <p class="result-banner" id="matchOverTitle" style="margin-top:0;"></p>
+        <button class="big-btn" id="btnRematch" style="max-width:260px; margin:6px auto 0;">もう一度対戦する</button>
+        <p class="status-line" id="rematchStatus"></p>
       </div>
 
       <div class="leave-row">
@@ -442,7 +449,12 @@
   const resultBanner = document.getElementById('resultBanner');
   const statusLine = document.getElementById('statusLine');
   const choiceButtons = document.querySelectorAll('.choice-btn');
+  const choicesEl = document.getElementById('choices');
   const btnLeave = document.getElementById('btnLeave');
+  const matchOverPanel = document.getElementById('matchOverPanel');
+  const matchOverTitle = document.getElementById('matchOverTitle');
+  const btnRematch = document.getElementById('btnRematch');
+  const rematchStatus = document.getElementById('rematchStatus');
 
   function resetArena(){
     youHandEl.innerHTML = questionSvg();
@@ -451,6 +463,10 @@
     resultBanner.className = 'result-banner';
     statusLine.textContent = '';
     choiceButtons.forEach(b => { b.disabled = false; b.classList.remove('selected'); });
+    choicesEl.style.display = '';
+    matchOverPanel.style.display = 'none';
+    rematchStatus.textContent = '';
+    btnRematch.disabled = false;
   }
 
   socket.on('opponentJoined', () => {
@@ -492,11 +508,38 @@
       resultBanner.className = 'result-banner';
     }
 
+    if(data.matchOver){
+      choiceButtons.forEach(b => { b.disabled = true; b.classList.remove('selected'); });
+      choicesEl.style.display = 'none';
+      matchOverTitle.textContent = data.youWonMatch
+        ? '10本先取！あなたの勝利です！'
+        : '10本先取…相手の勝利です';
+      matchOverTitle.className = 'result-banner ' + (data.youWonMatch ? 'win' : 'lose');
+      matchOverPanel.style.display = 'block';
+      return;
+    }
+
     setTimeout(() => {
       choiceButtons.forEach(b => { b.disabled = false; b.classList.remove('selected'); });
       resultBanner.textContent = 'もう一度、手を選んでね';
       resultBanner.className = 'result-banner';
     }, 1400);
+  });
+
+  btnRematch.addEventListener('click', () => {
+    btnRematch.disabled = true;
+    rematchStatus.textContent = '相手を待っています…';
+    socket.emit('requestRematch');
+  });
+
+  socket.on('opponentWantsRematch', () => {
+    rematchStatus.textContent = '相手が再戦を希望しています。「もう一度対戦する」を押してください';
+  });
+
+  socket.on('rematchStart', () => {
+    yourScoreEl.textContent = '0';
+    oppScoreEl.textContent = '0';
+    resetArena();
   });
 
   socket.on('opponentLeft', () => {

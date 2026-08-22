@@ -20,6 +20,7 @@ let waitingQueue = [];
 
 const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 紛らわしい文字(0/O, 1/I)は除外
 const BEATS = { rock: 'scissors', scissors: 'paper', paper: 'rock' };
+const WIN_SCORE = 10; // 先取本数
 
 function generateRoomCode() {
   let code;
@@ -64,7 +65,13 @@ io.on('connection', (socket) => {
   socket.on('createRoom', () => {
     leaveCurrentRoom(socket);
     const code = generateRoomCode();
-    rooms.set(code, { players: [socket.id], choices: {}, scores: { [socket.id]: 0 } });
+    rooms.set(code, {
+      players: [socket.id],
+      choices: {},
+      scores: { [socket.id]: 0 },
+      matchOver: false,
+      rematchRequests: new Set(),
+    });
     socket.join(code);
     socket.data.room = code;
     socket.emit('roomCreated', { code });
@@ -109,6 +116,8 @@ io.on('connection', (socket) => {
         players: [opponentId, socket.id],
         choices: {},
         scores: { [opponentId]: 0, [socket.id]: 0 },
+        matchOver: false,
+        rematchRequests: new Set(),
       });
       opponentSocket.join(code);
       opponentSocket.data.room = code;
@@ -129,7 +138,7 @@ io.on('connection', (socket) => {
 
     const code = socket.data.room;
     const room = rooms.get(code);
-    if (!room || room.players.length < 2) return;
+    if (!room || room.players.length < 2 || room.matchOver) return;
 
     room.choices[socket.id] = hand;
     const otherId = room.players.find((id) => id !== socket.id);
@@ -144,12 +153,17 @@ io.on('connection', (socket) => {
       if (result === 'p1') room.scores[p1]++;
       else if (result === 'p2') room.scores[p2]++;
 
+      const matchOver = room.scores[p1] >= WIN_SCORE || room.scores[p2] >= WIN_SCORE;
+      if (matchOver) room.matchOver = true;
+
       io.to(p1).emit('roundResult', {
         yourHand: h1,
         opponentHand: h2,
         outcome: result === 'draw' ? 'draw' : result === 'p1' ? 'win' : 'lose',
         yourScore: room.scores[p1],
         opponentScore: room.scores[p2],
+        matchOver,
+        youWonMatch: matchOver ? room.scores[p1] >= WIN_SCORE : null,
       });
       io.to(p2).emit('roundResult', {
         yourHand: h2,
@@ -157,9 +171,31 @@ io.on('connection', (socket) => {
         outcome: result === 'draw' ? 'draw' : result === 'p2' ? 'win' : 'lose',
         yourScore: room.scores[p2],
         opponentScore: room.scores[p1],
+        matchOver,
+        youWonMatch: matchOver ? room.scores[p2] >= WIN_SCORE : null,
       });
 
       room.choices = {};
+    }
+  });
+
+  socket.on('requestRematch', () => {
+    const code = socket.data.room;
+    const room = rooms.get(code);
+    if (!room || room.players.length < 2) return;
+
+    room.rematchRequests.add(socket.id);
+
+    if (room.rematchRequests.size >= 2) {
+      const [p1, p2] = room.players;
+      room.scores = { [p1]: 0, [p2]: 0 };
+      room.choices = {};
+      room.matchOver = false;
+      room.rematchRequests.clear();
+      io.to(code).emit('rematchStart');
+    } else {
+      const otherId = room.players.find((id) => id !== socket.id);
+      if (otherId) io.to(otherId).emit('opponentWantsRematch');
     }
   });
 
