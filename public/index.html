@@ -672,7 +672,8 @@
   const choicesEl = document.getElementById('choices');
   const btnLeave = document.getElementById('btnLeave');
   const matchOverPanel = document.getElementById('matchOverPanel');
-  const matchOverTitle = document.getElementById('matchOverTitle');
+  const resultYourScoreEl = document.getElementById('resultYourScore');
+  const resultOppScoreEl = document.getElementById('resultOppScore');
   const btnRematch = document.getElementById('btnRematch');
   const rematchStatus = document.getElementById('rematchStatus');
 
@@ -688,6 +689,7 @@
     choiceButtons.forEach(b => { b.disabled = false; b.classList.remove('selected'); });
     choicesEl.style.display = '';
     matchOverPanel.style.display = 'none';
+    matchOverPanel.classList.remove('result-win', 'result-lose');
     rematchStatus.textContent = '';
     btnRematch.disabled = false;
   }
@@ -736,10 +738,10 @@
     if(data.matchOver){
       choiceButtons.forEach(b => { b.disabled = true; b.classList.remove('selected'); });
       choicesEl.style.display = 'none';
-      matchOverTitle.textContent = data.youWonMatch
-        ? '5本先取！あなたの勝利です！'
-        : `5本先取…${vsAI ? 'AI' : '相手'}の勝利です`;
-      matchOverTitle.className = 'result-banner ' + (data.youWonMatch ? 'win' : 'lose');
+      setScore(resultYourScoreEl, data.yourScore);
+      setScore(resultOppScoreEl, data.opponentScore);
+      matchOverPanel.classList.toggle('result-win', data.youWonMatch);
+      matchOverPanel.classList.toggle('result-lose', !data.youWonMatch);
       matchOverPanel.style.display = 'block';
       return;
     }
