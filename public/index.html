@@ -366,6 +366,48 @@
     border-color:var(--gold);
     color:var(--ink);
   }
+  .match-over{
+    position:fixed;
+    inset:0;
+    z-index:30;
+    display:none;
+    overflow:hidden;
+    background:#191c3a;
+  }
+  .match-over.result-win{ background:#191c3a url('/assets/result_win.png') center top / auto 100% no-repeat; }
+  .match-over.result-lose{ background:#191c3a url('/assets/result_lose.png') center top / auto 100% no-repeat; }
+  .match-over .result-image{ display:none; }
+  .match-over .result-scorecard{
+    position:absolute;
+    top:59%;
+    left:50%;
+    width:min(45vh, 76vw, 500px);
+    transform:translateX(-50%);
+    aspect-ratio:2176 / 704;
+    background:url('/assets/battle_score.png') center / 100% 100% no-repeat;
+  }
+  .match-over .result-scorecard .score-item{
+    top:50%;
+    height:58%;
+    transform:translateY(-50%);
+  }
+  .match-over .result-scorecard .score-item .num{ height:100%; }
+  .match-over .result-actions{
+    position:absolute;
+    left:50%;
+    bottom:5%;
+    width:30%;
+    height:10%;
+    transform:translateX(35%);
+    padding:0;
+    border:0;
+    border-radius:30px;
+    background:transparent;
+    color:transparent;
+    cursor:pointer;
+  }
+  .match-over .result-actions:hover{ box-shadow:0 0 0 4px rgba(255,255,255,.5), 0 0 20px rgba(35,111,255,.7); }
+  .match-over .result-status{ position:absolute; left:50%; bottom:1%; transform:translateX(-50%); margin:0; color:var(--paper); }
 
   .leave-row{ text-align:center; margin-top:20px; }
   body.game-active > .stage .leave-row{ margin-top:5vh; }
@@ -473,10 +515,17 @@
         </button>
       </div>
 
-      <div class="match-over" id="matchOverPanel" style="display:none; text-align:center;">
-        <p class="result-banner" id="matchOverTitle" style="margin-top:0;"></p>
-        <button class="big-btn" id="btnRematch" style="max-width:260px; margin:6px auto 0;">もう一度対戦する</button>
-        <p class="status-line" id="rematchStatus"></p>
+      <div class="match-over" id="matchOverPanel">
+        <div class="result-scorecard">
+          <div class="score-item">
+            <div class="num score-number-0" id="resultYourScore">0</div>
+          </div>
+          <div class="score-item">
+            <div class="num score-number-0" id="resultOppScore">0</div>
+          </div>
+        </div>
+        <button class="result-actions" id="btnRematch" type="button" aria-label="もう一度対戦する"></button>
+        <p class="result-status status-line" id="rematchStatus"></p>
       </div>
 
       <div class="leave-row">
