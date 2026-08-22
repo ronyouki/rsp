@@ -119,8 +119,7 @@
     background:#191c3a url('/assets/battle_background.png') center top / auto 100% no-repeat;
     box-shadow:none;
   }
-  body.game-active .leave-row,
-  body.game-active .history-panel{
+  body.game-active .leave-row{
     width:min(64%, 620px);
     margin-left:auto;
     margin-right:auto;
@@ -336,6 +335,7 @@
   .status-line{ text-align:center; font-size:13px; opacity:.6; margin-bottom:18px; min-height:16px; }
 
   .choices{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  body.game-active .choices{ margin-top:5vh; }
   .choice-btn{
     appearance:none;
     border:1.5px solid var(--line);
@@ -368,56 +368,9 @@
   }
 
   .leave-row{ text-align:center; margin-top:20px; }
+  body.game-active > .stage .leave-row{ margin-top:5vh; }
   .leave-row .text-btn{ background:rgba(25,28,58,.82); border-color:rgba(250,245,232,.28); }
 
-  /* --- 対戦履歴 --- */
-  .history-panel{
-    margin-top:20px;
-    border-top:1px solid var(--line);
-    padding-top:14px;
-    padding:14px;
-    border:1px solid rgba(250,245,232,.2);
-    border-radius:14px;
-    background:rgba(25,28,58,.72);
-  }
-  .history-title{
-    font-family:'Kosugi Maru', sans-serif;
-    font-size:12px;
-    letter-spacing:.1em;
-    opacity:.6;
-    text-align:center;
-    margin:0 0 10px;
-  }
-  .history-list{
-    max-height:160px;
-    overflow-y:auto;
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-  }
-  .history-empty{
-    text-align:center;
-    font-size:12px;
-    opacity:.4;
-    padding:8px 0;
-  }
-  .history-row{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:8px;
-    font-size:12px;
-    background:rgba(25,28,58,.78);
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:7px 12px;
-  }
-  .history-row .round-no{ opacity:.5; min-width:34px; }
-  .history-row .hands{ flex:1; text-align:center; opacity:.85; }
-  .history-row .outcome{ font-family:'Kosugi Maru', sans-serif; min-width:44px; text-align:right; }
-  .history-row.win .outcome{ color:var(--teal); }
-  .history-row.lose .outcome{ color:var(--vermillion); }
-  .history-row.draw .outcome{ color:var(--gold); }
   .text-btn{
     font-family:'Kosugi Maru', sans-serif;
     background:none; border:1px solid var(--line);
@@ -530,12 +483,6 @@
         <button class="text-btn" id="btnLeave">部屋を出る</button>
       </div>
 
-      <div class="history-panel">
-        <p class="history-title">対戦履歴</p>
-        <div class="history-list" id="historyList">
-          <p class="history-empty">まだ対戦記録がありません</p>
-        </div>
-      </div>
     </section>
 
   </div>
@@ -679,33 +626,9 @@
   const matchOverTitle = document.getElementById('matchOverTitle');
   const btnRematch = document.getElementById('btnRematch');
   const rematchStatus = document.getElementById('rematchStatus');
-  const historyList = document.getElementById('historyList');
 
   const oppTag = document.getElementById('oppTag');
-  const HAND_LABEL = { rock: 'グー', scissors: 'チョキ', paper: 'パー' };
-  const OUTCOME_LABEL = { win: '勝ち', lose: '負け', draw: 'あいこ' };
-  let history = [];
   let vsAI = false;
-
-  function renderHistory(){
-    if(history.length === 0){
-      historyList.innerHTML = '<p class="history-empty">まだ対戦記録がありません</p>';
-      return;
-    }
-    // 新しい記録を上に表示
-    historyList.innerHTML = history.slice().reverse().map(h => `
-      <div class="history-row ${h.outcome}">
-        <span class="round-no">第${h.round}本</span>
-        <span class="hands">${HAND_LABEL[h.yourHand]} vs ${HAND_LABEL[h.opponentHand]}</span>
-        <span class="outcome">${OUTCOME_LABEL[h.outcome]}</span>
-      </div>
-    `).join('');
-  }
-
-  function resetHistory(){
-    history = [];
-    renderHistory();
-  }
 
   function resetArena(){
     youHandEl.innerHTML = questionSvg();
@@ -718,7 +641,6 @@
     matchOverPanel.style.display = 'none';
     rematchStatus.textContent = '';
     btnRematch.disabled = false;
-    resetHistory();
   }
 
   socket.on('opponentJoined', (info) => {
@@ -761,14 +683,6 @@
       resultBanner.textContent = 'あいこでしょ！';
       resultBanner.className = 'result-banner';
     }
-
-    history.push({
-      round: history.length + 1,
-      yourHand: data.yourHand,
-      opponentHand: data.opponentHand,
-      outcome: data.outcome,
-    });
-    renderHistory();
 
     if(data.matchOver){
       choiceButtons.forEach(b => { b.disabled = true; b.classList.remove('selected'); });
