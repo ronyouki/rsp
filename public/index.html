@@ -292,7 +292,7 @@
     width:min(52vh, 88vw, 560px);
     aspect-ratio:3 / 2;
     min-height:0;
-    margin:14vh auto 4vh;
+    margin:14vh auto 1vh;
     background:url('/assets/battle_hand_sheet.png') center / 100% 100% no-repeat;
   }
   .fighter{
@@ -323,7 +323,7 @@
     font-family:'Kosugi Maru', sans-serif;
     font-size:clamp(14px,3.5vw,18px);
     min-height:30px;
-    margin:14px 0 4px;
+    margin:6px 0 2px;
     padding:8px 16px;
     border-radius:12px;
     background:rgba(25,28,58,.82);
@@ -332,10 +332,10 @@
   }
   .result-banner.win{ color:var(--teal); }
   .result-banner.lose{ color:var(--vermillion); }
-  .status-line{ text-align:center; font-size:13px; opacity:.6; margin-bottom:18px; min-height:16px; }
+  .status-line{ text-align:center; font-size:13px; opacity:.6; margin-bottom:8px; min-height:16px; }
 
   .choices{ display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
-  body.game-active .choices{ margin-top:5vh; }
+  body.game-active .choices{ margin-top:1vh; }
   .choice-btn{
     appearance:none;
     border:1.5px solid var(--line);
@@ -408,9 +408,24 @@
   }
   .match-over .result-actions:hover{ box-shadow:0 0 0 4px rgba(255,255,255,.5), 0 0 20px rgba(35,111,255,.7); }
   .match-over .result-status{ position:absolute; left:50%; bottom:1%; transform:translateX(-50%); margin:0; color:var(--paper); }
+  .match-over .btn-title{
+    position:absolute;
+    top:4%;
+    left:4%;
+    padding:8px 18px;
+    border-radius:999px;
+    background:rgba(25,28,58,.86);
+    border:1px solid rgba(250,245,232,.42);
+    color:var(--paper);
+    font-family:'Kosugi Maru', sans-serif;
+    font-size:12px;
+    letter-spacing:.08em;
+    cursor:pointer;
+  }
+  .match-over .btn-title:hover{ border-color:var(--gold); color:var(--gold); }
 
   .leave-row{ text-align:center; margin-top:20px; }
-  body.game-active > .stage .leave-row{ margin-top:5vh; }
+  body.game-active > .stage .leave-row{ margin-top:1.5vh; }
   .leave-row .text-btn{ background:rgba(25,28,58,.82); border-color:rgba(250,245,232,.28); }
 
   .text-btn{
@@ -516,6 +531,7 @@
       </div>
 
       <div class="match-over" id="matchOverPanel">
+        <button class="btn-title" id="btnToTitle" type="button">タイトルへ</button>
         <div class="result-scorecard">
           <div class="score-item">
             <div class="num score-number-0" id="resultYourScore">0</div>
@@ -676,6 +692,7 @@
   const resultOppScoreEl = document.getElementById('resultOppScore');
   const btnRematch = document.getElementById('btnRematch');
   const rematchStatus = document.getElementById('rematchStatus');
+  const btnToTitle = document.getElementById('btnToTitle');
 
   const oppTag = document.getElementById('oppTag');
   let vsAI = false;
@@ -781,6 +798,11 @@
   });
 
   btnLeave.addEventListener('click', () => {
+    socket.emit('leaveRoom');
+    showScreen('lobby');
+  });
+
+  btnToTitle.addEventListener('click', () => {
     socket.emit('leaveRoom');
     showScreen('lobby');
   });
