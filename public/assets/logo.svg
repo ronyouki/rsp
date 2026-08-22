@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 300" role="img" aria-labelledby="title desc">
+  <title id="title">じゃんけんぽん！</title>
+  <desc id="desc">Gold rock paper scissors emblem and Japanese wordmark</desc>
+  <g fill="none" stroke="#c49c34" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M350 24l20 62 63-20-38 54 58 35-68-8-7 68-28-63-61 30 38-54-57-37 67 9z"/>
+    <circle cx="350" cy="122" r="34"/>
+    <path d="M337 108l26 26m0-26l-26 26"/>
+  </g>
+  <text x="350" y="239" text-anchor="middle" fill="#faf5e8" font-family="sans-serif" font-size="48" font-weight="700" letter-spacing="8">じゃんけんぽん！</text>
+</svg>
