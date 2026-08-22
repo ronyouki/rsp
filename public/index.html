@@ -247,7 +247,7 @@
     border:0;
     background:transparent;
   }
-  .hand-display img{ width:58%; height:58%; object-fit:contain; }
+  .hand-display img{ width:68%; height:68%; object-fit:contain; }
   .hand-question{ font-size:34px; font-weight:700; color:var(--paper); }
   .vs-mark{ display:none; }
 
@@ -257,6 +257,10 @@
     font-size:clamp(18px,5vw,24px);
     min-height:30px;
     margin:14px 0 4px;
+    padding:8px 16px;
+    border-radius:12px;
+    background:rgba(25,28,58,.82);
+    border:1px solid rgba(250,245,232,.24);
     color:var(--gold);
   }
   .result-banner.win{ color:var(--teal); }
@@ -267,7 +271,7 @@
   .choice-btn{
     appearance:none;
     border:1.5px solid var(--line);
-    background:rgba(250,245,232,0.04);
+    background:rgba(25,28,58,.78);
     border-radius:18px;
     padding:14px 10px 10px;
     width:92px;
@@ -285,12 +289,17 @@
   .choice-btn:disabled{ opacity:.35; cursor:not-allowed; transform:none; }
 
   .leave-row{ text-align:center; margin-top:20px; }
+  .leave-row .text-btn{ background:rgba(25,28,58,.82); border-color:rgba(250,245,232,.28); }
 
   /* --- 対戦履歴 --- */
   .history-panel{
     margin-top:20px;
     border-top:1px solid var(--line);
     padding-top:14px;
+    padding:14px;
+    border:1px solid rgba(250,245,232,.2);
+    border-radius:14px;
+    background:rgba(25,28,58,.72);
   }
   .history-title{
     font-family:'Kosugi Maru', sans-serif;
@@ -319,7 +328,7 @@
     justify-content:space-between;
     gap:8px;
     font-size:12px;
-    background:rgba(250,245,232,0.04);
+    background:rgba(25,28,58,.78);
     border:1px solid var(--line);
     border-radius:10px;
     padding:7px 12px;
