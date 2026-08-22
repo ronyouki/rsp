@@ -96,44 +96,6 @@ function leaveCurrentRoom(socket) {
 }
 
 io.on('connection', (socket) => {
-  socket.on('createRoom', () => {
-    leaveCurrentRoom(socket);
-    const code = generateRoomCode();
-    rooms.set(code, {
-      players: [socket.id],
-      choices: {},
-      scores: { [socket.id]: 0 },
-      matchOver: false,
-      rematchRequests: new Set(),
-    });
-    socket.join(code);
-    socket.data.room = code;
-    socket.emit('roomCreated', { code });
-  });
-
-  socket.on('joinRoom', (rawCode) => {
-    const code = String(rawCode || '').toUpperCase().trim();
-    const room = rooms.get(code);
-
-    if (!room) {
-      socket.emit('joinError', '部屋が見つかりません。コードを確認してください。');
-      return;
-    }
-    if (room.players.length >= 2) {
-      socket.emit('joinError', 'この部屋はすでに満員です。');
-      return;
-    }
-
-    leaveCurrentRoom(socket);
-    room.players.push(socket.id);
-    room.scores[socket.id] = 0;
-    room.vsAI = false;
-    socket.join(code);
-    socket.data.room = code;
-
-    io.to(code).emit('opponentJoined', { vsAI: false });
-  });
-
   // 合言葉なしのランダムマッチング（見つからない場合は一定時間後にAI対戦へ）
   socket.on('findRandomMatch', () => {
     leaveCurrentRoom(socket);
